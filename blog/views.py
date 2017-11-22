@@ -24,3 +24,4 @@ def post_detail(request, year, month, day, post):
 
 
 # hahahhaha
+# malegeji
