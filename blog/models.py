@@ -16,8 +16,8 @@ class PublishedManager(models.Manager):
 
 class Post(models.Model):
     STATUS_CHOICES = (
-        ('draft', 'DRAFT'),
-        ('published', 'PUBLISHED'),
+        ('draft', 'Draft'),
+        ('published', 'Published'),
 
     )
     title = models.CharField(max_length=250)
@@ -26,19 +26,16 @@ class Post(models.Model):
     author = models.ForeignKey(User,
                                related_name='blog_posts'
                                )
-    body = models.TextField(default='boddy')
+    body = models.TextField()
+    # body = models.TextField(default='boddy')
     publish = models.DateTimeField(default=timezone.now)
     created = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10,
                               choices=STATUS_CHOICES,
                               default='draft')
-
     objects = models.Manager()
     published = PublishedManager()
-
-
-
 
     class Meta:
         ordering = ('-publish',)
