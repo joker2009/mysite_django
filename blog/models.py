@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 from django.core.urlresolvers import reverse
+from taggit.managers import TaggableManager
 
 
 class PublishedManager(models.Manager):
@@ -36,6 +37,7 @@ class Post(models.Model):
                               default='draft')
     objects = models.Manager()
     published = PublishedManager()
+    tags = TaggableManager()
 
     class Meta:
         ordering = ('-publish',)
@@ -67,4 +69,6 @@ class Comment(models.Model):
         ordering = ('created',)
 
     def __str__(self):
-        return 'Comment by {} on {}' .format(self.name, self.post)
+        return 'Comment by {} on {}'.format(self.name, self.post)
+
+

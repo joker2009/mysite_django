@@ -12,15 +12,21 @@ from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
 
 from .models import Post, Comment
+from taggit.models import Tag
 
 
-def post_list(request):
+def post_list(request, tag_slug=None):
     # posts = Post.published.all()
     # return render(request,
     #               'blog/post/list.html',
     #               {'posts': posts})
     object_list = Post.published.all()
-    paginator = Paginator(object_list, 3)  #3 posts in each page
+    tag = None
+
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+    paginator = Paginator(object_list, 3)  # 3 posts in each page
     page = request.GET.get('page')
     try:
         posts = paginator.page(page)
@@ -31,7 +37,8 @@ def post_list(request):
     return render(request,
                   'blog/post/list.html',
                   {'page': page,
-                   'posts': posts})
+                   'posts': posts,
+                   'tag': tag})
 
 
 def post_detail(request, year, month, day, post):
@@ -68,25 +75,27 @@ class PostListView(ListView):
 
 
 def post_share(request, post_id):
-
+    # retrieve post by id
     post = get_object_or_404(Post, id=post_id, status='published')
     sent = False
-    print('0')
+    # print('0')
     if request.method == 'POST':
+        # Form was submitted
         form = EmailPostForm(request.POST)
-        print('1')
+        # print('1')
         if form.is_valid():
+            # Form fields passed validation
             cd = form.cleaned_data
-            print('2')
+            # print('2')
             post_url = request.build_absolute_uri(post.get_absolute_url())
             subject = '{}({}) recommends you reading "{}"'.format(cd['name'], cd['email'], post.title)
             message = 'Read "{}" at {}\n\n{}\'s comments:{}'.format(post.title, post_url, cd['name'], cd['comments'])
-            print(3)
+            # print(3)
             send_mail(subject, message, '304640509@qq.com', [cd['to']])
             sent = True
-            print(4)
+            # print(4)
     else:
         form = EmailPostForm()
-    print(5)
+    # print(5)
     return render(request, 'blog/post/share.html', {'post': post, 'form': form, 'sent': sent})
 
